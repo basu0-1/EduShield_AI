@@ -1,0 +1,9 @@
+1. Students with low GPA show higher dropout rates.
+
+2. Attendance is strongly related to dropout.
+
+3. Higher stress levels increase dropout probability.
+
+4. Certain departments have more at-risk students.
+
+5. Family income may influence dropout behavior.
