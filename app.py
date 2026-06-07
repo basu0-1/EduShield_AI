@@ -230,7 +230,22 @@ if page == "📋 Dashboard":
         c3.metric("Features", "27")
         c4.metric("Departments", "4")
         
+        st.markdown("---")
+
+        st.markdown(
+            """
+            ### 🎯 Mission
         
+            EduShield AI empowers educational institutions
+            to identify at-risk students early and enable
+            timely intervention through Machine Learning
+            and Explainable AI.
+        
+            #### Technology Stack
+        
+            Python | Streamlit | XGBoost | SHAP | Plotly
+            """
+        )
 
 # ==========================================
 # OTHER ROUTED PAGES
