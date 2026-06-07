@@ -32,6 +32,7 @@ from model_config import (
     RANDOM_STATE,
     TEST_SIZE
 )
+from xgboost import XGBClassifier
 
 
 # --------------------------------------------------
@@ -192,19 +193,27 @@ print("\nPreprocessing Completed")
 models = {
 
     "Logistic Regression":
-
         LogisticRegression(
             max_iter=1000,
             random_state=RANDOM_STATE
         ),
 
     "Random Forest":
-
         RandomForestClassifier(
             n_estimators=200,
             random_state=RANDOM_STATE
-        )
+        ),
 
+    "XGBoost":
+        XGBClassifier(
+            n_estimators=300,
+            learning_rate=0.05,
+            max_depth=6,
+            subsample=0.8,
+            colsample_bytree=0.8,
+            random_state=RANDOM_STATE,
+            eval_metric="logloss"
+        )
 }
 
 
