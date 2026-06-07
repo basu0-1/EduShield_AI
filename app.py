@@ -1,25 +1,34 @@
 import streamlit as st
 import os
 import pandas as pd
+from streamlit_option_menu import option_menu
 from src.dashboard.prediction import show_prediction
 from src.dashboard.analytics import show_analytics
-from src.dashboard.explainability import show_explainability
-
+from src.dashboard.explainability_page import show_explainability
+from src.dashboard.risk_decomposition import show_risk_decomposition
+import bcrypt
 
 # ==========================================
-# PAGE CONFIG
+# PAGE CONFIG & CSS LOADING
 # ==========================================
-
 st.set_page_config(
     page_title="EduShield AI",
     page_icon="🎓",
     layout="wide"
 )
+
+def load_css():
+    css_path = "styles/style.css"
+    if os.path.exists(css_path):
+        with open(css_path) as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+load_css()
+
 # =======================
-# AUTH SYSTEM (NEW)
+# AUTH SYSTEM
 # =======================
 USERS_FILE = "users.csv"
-
 if not os.path.exists(USERS_FILE):
     pd.DataFrame(columns=["username", "password"]).to_csv(USERS_FILE, index=False)
 
@@ -28,36 +37,30 @@ def load_users():
 
 def save_user(username, password):
     df = load_users()
-
     username = username.strip()
     password = password.strip()
-
-    if username in df["username"].astype(str).str.strip().values:
+    
+    if username.lower() in (df["username"].astype(str).str.strip().str.lower().values):
         return False
 
-    new_row = pd.DataFrame([[username, password]], columns=["username", "password"])
+    hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    new_row = pd.DataFrame([[username, hashed_password]], columns=["username", "password"])
     df = pd.concat([df, new_row], ignore_index=True)
-
     df.to_csv(USERS_FILE, index=False)
     return True
 
 def authenticate(username, password):
     df = load_users()
-
     username = username.strip()
     password = password.strip()
+    
+    user_row = df[df["username"].astype(str).str.strip().str.lower() == username.lower()]
+    if user_row.empty:
+        return False
+        
+    stored_hash = user_row.iloc[0]["password"]
+    return bcrypt.checkpw(password.encode("utf-8"), stored_hash.encode("utf-8"))
 
-    df["username"] = df["username"].astype(str).str.strip()
-    df["password"] = df["password"].astype(str).str.strip()
-
-    user = df[
-        (df["username"].str.lower() == username.lower()) &
-        (df["password"] == password)
-    ]
-
-    return not user.empty
-
-# session state
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "user" not in st.session_state:
@@ -67,27 +70,22 @@ if "user" not in st.session_state:
 # LOGIN / SIGNUP UI
 # =======================
 if not st.session_state.logged_in:
-
-    menu = st.radio("Choose Action", ["Signup","Login"])
+    st.title("🎓 EduShield AI")
+    menu = st.radio("Choose Action", ["Login", "Signup"], horizontal=True)
 
     if menu == "Signup":
         st.subheader("Create Account")
-
         new_user = st.text_input("Username")
         new_pass = st.text_input("Password", type="password")
-
         if st.button("Signup"):
             if save_user(new_user, new_pass):
                 st.success("Account created! Please login.")
             else:
                 st.error("User already exists!")
-
     else:
         st.subheader("Login")
-
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
-
         if st.button("Login"):
             if authenticate(username, password):
                 st.session_state.logged_in = True
@@ -96,102 +94,155 @@ if not st.session_state.logged_in:
                 st.rerun()
             else:
                 st.error("Invalid credentials")
+    st.stop()
 
-    st.stop()   # 🚨 STOP APP until login
-
-# =======================
-# LOGOUT BUTTON
-# =======================
-st.sidebar.success(f"Logged in as: {st.session_state.user}")
-
-if st.sidebar.button("Logout"):
-    st.session_state.logged_in = False
-    st.session_state.user = None
-    st.rerun()
 # ==========================================
-# SIDEBAR
+# TOP NAVIGATION BAR
 # ==========================================
 
-st.sidebar.title("🎓 EduShield AI")
+# ==========================================
+# WEBSITE HEADER
+# ==========================================
 
-page = st.sidebar.radio(
+header_col1, header_col2 = st.columns([6, 1])
 
-    "Navigation",
+with header_col1:
+    st.markdown(
+        """
+        <h1 style='margin-bottom:0;'>
+        🎓 EduShield AI
+        </h1>
+        """,
+        unsafe_allow_html=True
+    )
 
+with header_col2:
+    st.markdown(
+        f"""
+        <div style='text-align:right; padding-top:15px;'>
+        👤 {st.session_state.user}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+col1, col2 = st.columns([8, 1])
+
+with col2:
+    if st.button("🚪 Logout"):
+        st.session_state.logged_in = False
+        st.session_state.user = None
+        st.rerun()
+
+page = st.selectbox(
+    "☰ Navigation",
     [
-        "Home",
-        "Prediction",
-        "Analytics",
-        "Explainability"
+        "📋 Dashboard",
+        "🎯 Prediction",
+        "📊 Analytics",
+        "🔍 Explainability",
+        "🌳 Risk Decomposition"
     ]
 )
 
+
 # ==========================================
-# HOME PAGE
+# HOME PAGE (THE IMAGE MATCHING DESIGN)
 # ==========================================
-
-if page == "Home":
-
-    st.title("🎓 EduShield AI")
-
-    st.subheader(
-        "Student Dropout Prediction & Early Warning System"
-    )
-
-    st.markdown(
+if page == "📋 Dashboard":
+    pass
+    if page == "📋 Dashboard":
+        st.markdown(
         """
-        ### Project Overview
+        <div style="
+        background: linear-gradient(135deg,#0b2b61,#2563eb);
+        padding:60px;
+        border-radius:20px;
+        text-align:center;
+        color:white;
+        ">
 
-        EduShield AI helps educational institutions
-        identify students who are at risk of dropping out
-        using Machine Learning and Explainable AI.
+        <h1 style="font-size:60px;">
+        🎓 EduShield AI
+        </h1>
 
-        ### Features
+        <h3>
+        Student Dropout Prediction &
+        Early Warning System
+        </h3>
 
-        ✅ Data Pipeline
+        <br>
 
-        ✅ Feature Engineering
+        <p style="font-size:22px;">
+        Predict • Explain • Prevent
+        </p>
 
-        ✅ Model Training
+        </div>
+        """,
+        unsafe_allow_html=True
+        )
+        st.markdown("## Platform Modules")
 
-        ✅ Model Evaluation
+        col1, col2, col3, col4 = st.columns(4)        
 
-        ✅ Explainable AI (SHAP)
+        with col1:
+            st.info(
+                """
+                🎯 Prediction        
 
-        ✅ Prediction Dashboard
+                Predict student dropout risk
+                """
+            )        
 
-        ✅ Analytics Dashboard
+        with col2:
+            st.info(
+                """
+                📊 Analytics        
 
-        ### Objective
+                Analyze trends and performance
+                """
+            )        
 
-        Detect at-risk students early and support
-        timely intervention by educators.
+        with col3:
+            st.info(
+                """
+                🔍 Explainability        
+
+                Understand AI decisions
+                """
+            )        
+
+        with col4:
+            st.info(
+                """
+                🌳 Risk Decomposition        
+
+                Break down risk contributors
+                """
+            )
+        st.markdown("---")
+
+        st.subheader("Platform Statistics")
         
-        📍Technology Stack: 
-        Python | Machine Learning | Streamlit | SHAP
-        """
-    )
+        c1, c2, c3, c4 = st.columns(4)
+        
+        c1.metric("Model Accuracy", "91.4%")
+        c2.metric("Students Analyzed", "10,000+")
+        c3.metric("Features", "27")
+        c4.metric("Departments", "4")
+        
+        
 
 # ==========================================
-# PREDICTION PAGE
+# OTHER ROUTED PAGES
 # ==========================================
-
-elif page == "Prediction":
-
+elif page == "🎯 Prediction":
     show_prediction()
 
-# ==========================================
-# ANALYTICS PAGE
-# ==========================================
-
-elif page == "Analytics":
-
+elif page ==  "📊 Analytics":
     show_analytics()
 
-# ==========================================
-# EXPLAINABILITY PAGE
-# ==========================================
-
-elif page == "Explainability":
-
+elif page == "🔍 Explainability":
     show_explainability()
+    
+elif page == "🌳 Risk Decomposition":
+    show_risk_decomposition()
