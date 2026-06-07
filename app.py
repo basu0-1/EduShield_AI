@@ -1,7 +1,7 @@
 import streamlit as st
 import os
 import pandas as pd
-from streamlit_option_menu import option_menu
+
 from src.dashboard.prediction import show_prediction
 from src.dashboard.analytics import show_analytics
 from src.dashboard.explainability_page import show_explainability
