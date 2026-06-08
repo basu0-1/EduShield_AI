@@ -8,9 +8,7 @@ from src.dashboard.explainability_page import show_explainability
 from src.dashboard.risk_decomposition import show_risk_decomposition
 import bcrypt
 
-# ==========================================
 # PAGE CONFIG & CSS LOADING
-# ==========================================
 st.set_page_config(
     page_title="EduShield AI",
     page_icon="🎓",
@@ -25,9 +23,7 @@ def load_css():
 
 load_css()
 
-# =======================
 # AUTH SYSTEM
-# =======================
 USERS_FILE = "users.csv"
 if not os.path.exists(USERS_FILE):
     pd.DataFrame(columns=["username", "password"]).to_csv(USERS_FILE, index=False)
@@ -66,9 +62,7 @@ if "logged_in" not in st.session_state:
 if "user" not in st.session_state:
     st.session_state.user = None
 
-# =======================
 # LOGIN / SIGNUP UI
-# =======================
 if not st.session_state.logged_in:
     st.title("🎓 EduShield AI")
     menu = st.radio("Choose Action", ["Login", "Signup"], horizontal=True)
@@ -96,45 +90,51 @@ if not st.session_state.logged_in:
                 st.error("Invalid credentials")
     st.stop()
 
-# ==========================================
-# TOP NAVIGATION BAR
-# ==========================================
+# PROFESSIONAL DASHBOARD HEADER
+header_left, header_middle, header_right = st.columns([3, 5, 2])
 
-# ==========================================
-# WEBSITE HEADER
-# ==========================================
+with header_left:
 
-header_col1, header_col2 = st.columns([6, 1])
-
-with header_col1:
     st.markdown(
         """
-        <h1 style='margin-bottom:0;'>
+        <h1 style="
+        margin-top:10px;
+        font-size:36px;
+        font-weight:700;
+        ">
         🎓 EduShield AI
         </h1>
         """,
         unsafe_allow_html=True
     )
 
-with header_col2:
+with header_middle:
+
+    search = st.text_input(
+        "",
+        placeholder="🔍 Search Students..."
+    )
+
+with header_right:
+
     st.markdown(
         f"""
-        <div style='text-align:right; padding-top:15px;'>
-        👤 {st.session_state.user}
+        <div style="
+        text-align:right;
+        font-size:18px;
+        margin-top:15px;
+        ">
+        👤 <b>{st.session_state.user}</b>
         </div>
         """,
         unsafe_allow_html=True
     )
-col1, col2 = st.columns([8, 1])
 
-with col2:
-    if st.button("🚪 Logout"):
-        st.session_state.logged_in = False
-        st.session_state.user = None
-        st.rerun()
+st.markdown("---")
 
+# DASHBOARD NAVIGATION
 page = st.selectbox(
-    "☰ Navigation",
+    "",
     [
         "📋 Dashboard",
         "🎯 Prediction",
@@ -144,10 +144,18 @@ page = st.selectbox(
     ]
 )
 
+logout_col1, logout_col2 = st.columns([8,1])
 
-# ==========================================
+with logout_col2:
+
+    if st.button("🚪 Logout"):
+        st.session_state.logged_in = False
+        st.session_state.user = None
+        st.rerun()
+
+st.markdown("---")
+
 # HOME PAGE (THE IMAGE MATCHING DESIGN)
-# ==========================================
 if page == "📋 Dashboard":
     pass
     if page == "📋 Dashboard":
@@ -223,12 +231,11 @@ if page == "📋 Dashboard":
 
         st.subheader("Platform Statistics")
         
-        c1, c2, c3, c4 = st.columns(4)
+        c1, c2, c3 = st.columns(3)
         
         c1.metric("Model Accuracy", "91.4%")
-        c2.metric("Students Analyzed", "10,000+")
-        c3.metric("Features", "27")
-        c4.metric("Departments", "4")
+        c2.metric("Total no. of Data", "10,000")
+        c3.metric("Features", "29")
         
         st.markdown("---")
 
@@ -240,16 +247,10 @@ if page == "📋 Dashboard":
             to identify at-risk students early and enable
             timely intervention through Machine Learning
             and Explainable AI.
-        
-            #### Technology Stack
-        
-            Python | Streamlit | XGBoost | SHAP | Plotly
             """
         )
 
-# ==========================================
 # OTHER ROUTED PAGES
-# ==========================================
 elif page == "🎯 Prediction":
     show_prediction()
 
