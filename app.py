@@ -108,13 +108,6 @@ with header_left:
         unsafe_allow_html=True
     )
 
-with header_middle:
-
-    search = st.text_input(
-        "",
-        placeholder="🔍 Search Students..."
-    )
-
 with header_right:
 
     st.markdown(
@@ -129,6 +122,14 @@ with header_right:
         """,
         unsafe_allow_html=True
     )
+    logout_col1, logout_col2 = st.columns([6,1])
+
+    with logout_col2:
+        if st.button("➡️"):
+            st.session_state.logged_in = False
+            st.session_state.user = None
+            st.rerun()
+
 
 st.markdown("---")
 
@@ -143,15 +144,6 @@ page = st.selectbox(
         "🌳 Risk Decomposition"
     ]
 )
-
-logout_col1, logout_col2 = st.columns([8,1])
-
-with logout_col2:
-
-    if st.button("🚪 Logout"):
-        st.session_state.logged_in = False
-        st.session_state.user = None
-        st.rerun()
 
 st.markdown("---")
 
