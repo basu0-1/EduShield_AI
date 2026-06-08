@@ -109,3 +109,38 @@ div[data-testid="metric-container"]{
     padding:10px 20px;
     border-radius:10px;
 }
+
+.shap-card{
+    background:white;
+    border-radius:15px;
+    padding:15px;
+    border:1px solid #e5e7eb;
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Search Bar */
+
+.stTextInput input{
+    border-radius:12px;
+    height:50px;
+    border:1px solid #d1d5db;
+}
+
+/* Select Box */
+
+.stSelectbox{
+    margin-top:10px;
+}
+
+/* Header */
+
+h1{
+    color:#0b2b61;
+}
+
+/* User */
+
+.user-card{
+    text-align:right;
+    font-weight:600;
+}
