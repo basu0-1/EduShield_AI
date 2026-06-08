@@ -1,77 +1,268 @@
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer,
+    Image,
+    PageBreak
+)
+
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
+
+import os
+
 from datetime import datetime
 
+def generate_professional_pdf(data, output_path):
 
-def generate_simple_pdf(data, filename):
-
-    doc = SimpleDocTemplate(filename)
-    styles = getSampleStyleSheet()
-
-    content = []
-
-    content.append(Paragraph("Student Dropout Risk Report", styles["Title"]))
-    content.append(Spacer(1, 12))
-
-    for key, value in data.items():
-        content.append(
-            Paragraph(f"{key}: {value}", styles["Normal"])
-        )
-        content.append(Spacer(1, 6))
-
-    doc.build(content)
-
-
-def generate_professional_pdf(data, filename):
-
-    doc = SimpleDocTemplate(filename)
+    doc = SimpleDocTemplate(output_path)
 
     styles = getSampleStyleSheet()
 
     content = []
+    
+    # ==================================
+    # HEADER
+    # ==================================
 
-    # Title
+    title = Paragraph(
+        "EduShield AI - Student Dropout Report",
+        styles["Title"]
+    )
+    
+    content.append(title)
+    content.append(Spacer(1, 20))
     content.append(
         Paragraph(
-            "EduShield AI - Student Risk Report",
+            "Generated On: {datetime.now().strftime('%d-%m-%Y %H:%M')}",
+            styles["BodyText"]
+        )
+    )
+
+    content.append(
+        Spacer(1,15)
+    )
+    # ==================================
+    # STUDENT DETAILS
+    # ==================================
+
+    content.append(
+        Paragraph(
+            "<b>Student Information</b>",
+            styles["Heading2"]
+        )
+    )
+    
+    content.append(
+        Paragraph(
+            "Student Name: {data['Student_Name']}",
+            styles["BodyText"]
+        )
+    )
+    
+    content.append(
+        Paragraph(
+            f"Age: {data['Age']}",
+            styles["BodyText"]
+        )
+    )
+
+    content.append(
+        Paragraph(
+            f"Department: {data['Department']}",
+            styles["BodyText"]
+        )
+    )
+
+    content.append(
+        Paragraph(
+            f"GPA: {data['GPA']}",
+            styles["BodyText"]
+        )
+    )
+
+    content.append(
+        Paragraph(
+            f"Attendance Rate: {data['Attendance_Rate']}%",
+            styles["BodyText"]
+        )
+    )
+
+    content.append(Spacer(1, 15))
+
+    # ==================================
+    # PREDICTION
+    # ==================================
+
+    content.append(
+        Paragraph(
+            "<b>Prediction Result</b>",
+            styles["Heading2"]
+        )
+    )
+
+    content.append(
+        Paragraph(
+            f"Risk Percentage: {data['Risk_Percent']}%",
+            styles["BodyText"]
+        )
+    )
+
+    content.append(
+        Paragraph(
+            f"Risk Level: {data['Risk_Level']}",
+            styles["BodyText"]
+        )
+    )
+    
+    content.append(
+        Paragraph(
+            "<font color='red'><b>AI Risk Assessment Completed</b></font>",
+            styles["BodyText"]
+        )
+    )
+    content.append(Spacer(1, 20))
+
+    # ==================================
+    # RECOMMENDATIONS
+    # ==================================
+
+    content.append(
+        Paragraph(
+            "<b>Recommendations</b>",
+            styles["Heading2"]
+        )
+    )
+
+    if data["Risk_Level"] == "Low":
+
+        recommendation = """
+        • Continue regular monitoring<br/>
+        • Encourage extracurricular participation<br/>
+        • Maintain academic support
+        """
+
+    elif data["Risk_Level"] == "Medium":
+
+        recommendation = """
+        • Academic mentoring<br/>
+        • Weekly attendance tracking<br/>
+        • Faculty counselling<br/>
+        • Assignment monitoring
+        """
+
+    else:
+
+        recommendation = """
+        • Immediate intervention required<br/>
+        • Parent communication<br/>
+        • Mental health counselling<br/>
+        • Academic support program<br/>
+        • Weekly performance review
+        """
+
+    content.append(
+        Paragraph(
+            recommendation,
+            styles["BodyText"]
+        )
+    )
+
+    content.append(PageBreak())
+
+    # ==================================
+    # SHAP SUMMARY
+    # ==================================
+
+    content.append(
+        Paragraph(
+            "SHAP Summary Plot",
+            styles["Heading1"]
+        )
+    )
+
+    summary_path = "reports/figures/shap_summary.png"
+
+    if os.path.exists(summary_path):
+
+        content.append(
+            Image(
+                summary_path,
+                width=450,
+                height=250
+            )
+        )
+
+    content.append(PageBreak())
+
+    # ==================================
+    # SHAP BAR
+    # ==================================
+
+    content.append(
+        Paragraph(
+            "SHAP Feature Importance",
+            styles["Heading1"]
+        )
+    )
+
+    bar_path = "reports/figures/shap_bar.png"
+
+    if os.path.exists(bar_path):
+
+        content.append(
+            Image(
+                bar_path,
+                width=450,
+                height=250
+            )
+        )
+
+    content.append(PageBreak())
+
+    # ==================================
+    # SHAP WATERFALL
+    # ==================================
+
+    content.append(
+        Paragraph(
+            "SHAP Waterfall Plot",
+            styles["Heading1"]
+        )
+    )
+
+    waterfall_path = "reports/figures/shap_waterfall.png"
+
+    if os.path.exists(waterfall_path):
+
+        content.append(
+            Image(
+                waterfall_path,
+                width=450,
+                height=250
+            )
+        )
+    
+    content.append(PageBreak())
+
+    content.append(
+        Paragraph(
+            "EduShield AI",
             styles["Title"]
         )
     )
-
-    content.append(Spacer(1, 12))
-
+    
     content.append(
         Paragraph(
-            f"Generated on: {datetime.now()}",
-            styles["Normal"]
+            "Student Dropout Prediction & Early Warning System",
+            styles["BodyText"]
         )
     )
-
-    content.append(Spacer(1, 20))
-
-    # Table Data
-    table_data = [["Field", "Value"]]
-
-    for key, value in data.items():
-        table_data.append([str(key), str(value)])
-
-    table = Table(table_data)
-
-    table.setStyle(
-        TableStyle([
-
-            ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
-
-            ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
-
-            ("GRID", (0, 0), (-1, -1), 0.5, colors.black),
-
-            ("BACKGROUND", (0, 1), (-1, -1), colors.beige)
-
-        ])
+    
+    content.append(
+        Paragraph(
+            "Predict • Explain • Prevent",
+            styles["Heading2"]
+        )
     )
-
-    content.append(table)
-
     doc.build(content)
