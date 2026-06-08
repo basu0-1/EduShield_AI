@@ -12,7 +12,7 @@ preprocessor = joblib.load("models/preprocessor.pkl")
 
 
 def show_prediction():
-    from src.utils.pdf_generator import generate_simple_pdf, generate_professional_pdf
+    from src.utils.pdf_generator import (generate_professional_pdf)
     import os
 
     st.header("🎯 Student Dropout Risk Prediction")
@@ -23,6 +23,9 @@ def show_prediction():
     
     #Row 1 — Student Profile
     st.markdown("## 👤 Student Profile")
+    student_name = st.text_input(
+    "Student Name"
+    )
     col1, col2, col3 = st.columns(3)
     with col1:
         age = st.number_input("Age",15,40,20)
@@ -42,7 +45,7 @@ def show_prediction():
             ["High School","Bachelor","Master","PhD"]
         )
         family_income = st.number_input(
-            "Family Income",
+            "Family Income (RUPEES)",
             value=30000
         )
     #Row 2 — Academic Performance   
@@ -88,7 +91,7 @@ def show_prediction():
         )    
     with col2:
         travel_time = st.number_input(
-            "Travel Time",
+            "Travel Time (MINUTES)",
             value=20
         )    
     with col3:
@@ -204,8 +207,23 @@ def show_prediction():
             
             st.session_state["latest_prediction"] = {"Age": age, "Department": department, "GPA": gpa, "Attendance_Rate": attendance_rate, "Stress_Index": stress_index, "Risk_Percent": risk_percent, "Risk_Level": risk_level}
 
-            st.session_state["report_data"] = {"Age": age, "Department": department, "GPA": gpa, "Attendance Rate": attendance_rate, "Stress Index": stress_index, "Risk(%)": risk_percent}
-            st.session_state["prediction_done"] = True
+            st.session_state["report_data"] = {
+                "Student_Name": student_name,
+
+                "Age": age,
+                "Gender": gender,
+                "Department": department,
+                "Semester": semester,
+
+                "GPA": gpa,
+                "CGPA": cgpa,
+
+                "Attendance Rate": attendance_rate,
+                "Stress Index": stress_index,
+
+                "Risk Percent": risk_percent,
+                "Risk Level": risk_level
+            }
             
             # save prediction history
 
@@ -253,56 +271,63 @@ def show_prediction():
             st.markdown("---")
             st.subheader("💡 Recommended Actions")
             if risk_percent < 30:
-                st.success(
-                    """
-                    ✓ Student performing well
-                    ✓ Continue regular monitoring
-                    ✓ Encourage participation in activities
-                    """
-                )
+
+                recommendation = """
+                Continue regular monitoring.
+                Encourage extracurricular participation.
+                Maintain academic support.
+                """
+            
+                st.success(recommendation)
+            
             elif risk_percent < 70:
-                st.warning(
-                    """
-                    ✓ Academic mentoring
-                    ✓ Monitor attendance weekly
-                    ✓ Faculty counselling
-                    ✓ Track assignment submissions
-                    """
-                )
+            
+                recommendation = """
+                Academic mentoring.
+                Weekly attendance tracking.
+                Faculty counselling.
+                Assignment monitoring.
+                """
+
+                st.warning(recommendation)
+            
             else:
-                st.error(
-                    """
-                    ✓ Immediate intervention required
-                    ✓ Parent communication
-                    ✓ Academic support program
-                    ✓ Mental health counselling
-                    ✓ Weekly progress monitoring
-                    """
-                )
+            
+                recommendation = """
+                Immediate intervention required.
+                Parent communication.
+                Mental health counselling.
+                Academic support program.
+                Weekly performance review.
+                """
+            
+                st.error(recommendation)
+                
+            st.session_state["report_data"]["Recommendations"] = recommendation
+            st.session_state["report_data"]["SHAP Summary"] = \
+                "reports/figures/shap_summary.png"
+
+            st.session_state["report_data"]["SHAP Waterfall"] = \
+                "reports/figures/shap_waterfall.png"
             # ====================================
             # PDF REPORT SECTION
             # ====================================
             
-            if st.session_state.get("prediction_done", False):
+            if st.session_state.get("prediction_done", True):
             
                 st.markdown("---")
                 st.subheader("📄 PDF Report Generator")
             
-                if st.button("Generate PDF Reports"):
+                if st.button("📄 Generate Report"):
                     st.success("Button Clicked")
                     
                     report_data = st.session_state["report_data"]
             
-                    PDF_FOLDER = r"C:\Projects\EduShield_AI\reports\pdf_reports"
+                    PDF_FOLDER = "reports/pdf_reports"
             
                     os.makedirs(PDF_FOLDER, exist_ok=True)
             
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            
-                    simple_pdf_path = os.path.join(
-                        PDF_FOLDER,
-                        f"simple_report_{timestamp}.pdf"
-                    )
             
                     professional_pdf_path = os.path.join(
                         PDF_FOLDER,
@@ -311,15 +336,8 @@ def show_prediction():
             
                     try:
             
-                        generate_simple_pdf(
-                            report_data,
-                            simple_pdf_path
-                        )
-            
-                        generate_professional_pdf(
-                            report_data,
-                            professional_pdf_path
-                        )
+                        professional_pdf_path
+                        generate_professional_pdf()
             
                         st.markdown(
                         f"""
@@ -338,25 +356,14 @@ def show_prediction():
                         unsafe_allow_html=True
                         )
             
-                        with open(simple_pdf_path, "rb") as pdf:
-            
-                            st.download_button(
-                                "📄 Download Simple PDF",
-                                pdf,
-                                file_name=os.path.basename(
-                                    simple_pdf_path
-                                ),
-                                mime="application/pdf"
-                            )
-            
                         with open(
                             professional_pdf_path,
                             "rb"
                         ) as pdf:
             
                             st.download_button(
-                                "⭐ Download Professional PDF",
-                                pdf,
+                                label="⬇ Download Student Report",
+                                data=pdf,
                                 file_name=os.path.basename(
                                     professional_pdf_path
                                 ),
