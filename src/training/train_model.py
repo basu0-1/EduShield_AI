@@ -34,29 +34,17 @@ from model_config import (
 )
 from xgboost import XGBClassifier
 
-
-# --------------------------------------------------
 # LOAD DATA
-# --------------------------------------------------
-
 df = pd.read_csv(DATA_PATH)
 
 print("\nDataset Loaded Successfully")
 
-
-# --------------------------------------------------
 # FEATURES AND TARGET
-# --------------------------------------------------
-
 X = df.drop(columns=[TARGET_COLUMN])
 
 y = df[TARGET_COLUMN]
 
-
-# --------------------------------------------------
 # IDENTIFY FEATURE TYPES
-# --------------------------------------------------
-
 numerical_features = [
 
     "Age",
