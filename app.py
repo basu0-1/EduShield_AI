@@ -61,6 +61,8 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "user" not in st.session_state:
     st.session_state.user = None
+if "theme" not in st.session_state:
+    st.session_state.theme = "Light"
 
 # LOGIN / SIGNUP UI
 if not st.session_state.logged_in:
@@ -90,51 +92,17 @@ if not st.session_state.logged_in:
                 st.error("Invalid credentials")
     st.stop()
 
-# PROFESSIONAL DASHBOARD HEADER
-header_left, header_middle, header_right = st.columns([3, 5, 2])
+# SIDEBAR NAVIGATION
+st.sidebar.markdown(
+    """
+    <div style='padding: 24px 10px 18px;'>
+        <h1 style='margin: 0; font-size: 28px; line-height: 1.1;'>🎓 EduShield AI</h1>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
-with header_left:
-
-    st.markdown(
-        """
-        <h1 style="
-        margin-top:10px;
-        font-size:36px;
-        font-weight:700;
-        ">
-        🎓 EduShield AI
-        </h1>
-        """,
-        unsafe_allow_html=True
-    )
-
-with header_right:
-
-    st.markdown(
-        f"""
-        <div style="
-        text-align:right;
-        font-size:18px;
-        margin-top:15px;
-        ">
-        👤 <b>{st.session_state.user}</b>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    logout_col1, logout_col2 = st.columns([6,1])
-
-    with logout_col2:
-        if st.button("➡️"):
-            st.session_state.logged_in = False
-            st.session_state.user = None
-            st.rerun()
-
-
-st.markdown("---")
-
-# DASHBOARD NAVIGATION
-page = st.selectbox(
+page = st.sidebar.radio(
     "",
     [
         "📋 Dashboard",
@@ -142,105 +110,149 @@ page = st.selectbox(
         "📊 Analytics",
         "🔍 Explainability",
         "🌳 Risk Decomposition"
-    ]
+    ],
+    index=0,
 )
 
-st.markdown("---")
+st.sidebar.markdown("<div class='sidebar-bottom-spacer'></div>", unsafe_allow_html=True)
+
+with st.sidebar.expander("⚙️ Settings", expanded=False):
+    st.session_state.theme = st.selectbox(
+        "Theme",
+        ["Light", "Dark"],
+        index=0 if st.session_state.theme == "Light" else 1,
+        key="theme_select",
+    )
+
+st.sidebar.markdown(
+    f"""
+    <div class='sidebar-user'>👤 <strong>{st.session_state.user}</strong></div>
+    """,
+    unsafe_allow_html=True,
+)
+
+if st.sidebar.button("Logout"):
+    st.session_state.logged_in = False
+    st.session_state.user = None
+    st.rerun()
+
+# Apply theme overrides
+if st.session_state.theme == "Dark":
+    st.markdown(
+        """
+        <style>
+            .main, .block-container {
+                background-color: #081229 !important;
+                color: #e2e8f0 !important;
+            }
+            .css-1d391kg, .css-1v3fvcr {
+                background-color: #0f172a !important;
+            }
+            .stButton button {
+                background-color: #2563eb !important;
+                color: white !important;
+            }
+            .stTextInput input, .stSelectbox select {
+                background-color: #0f172a !important;
+                color: #e2e8f0 !important;
+                border-color: #334155 !important;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 # HOME PAGE (THE IMAGE MATCHING DESIGN)
-if page == "📋 Dashboard":
-    pass
-    if page == "📋 Dashboard":
-        st.markdown(
+def show_dashboard_home():
+    st.markdown(
         """
-        <div style="
-        background: linear-gradient(135deg,#0b2b61,#2563eb);
-        padding:60px;
-        border-radius:20px;
-        text-align:center;
-        color:white;
-        ">
-
-        <h1 style="font-size:60px;">
-        🎓 EduShield AI
-        </h1>
-
-        <h3>
-        Student Dropout Prediction &
-        Early Warning System
-        </h3>
-
-        <br>
-
-        <p style="font-size:22px;">
-        Predict • Explain • Prevent
-        </p>
-
+        <div class="hero-card">
+            <p class="eyebrow">Intelligent student retention for modern institutions</p>
+            <h1>EduShield AI</h1>
+            <p class="hero-subtitle">
+                Predict student dropout risk, translate insights into action,
+                and support timely interventions with explainable machine learning.
+            </p>
+            <div class="hero-buttons">
+                <span class="cta-pill">Predict Student Risk</span>
+                <span class="cta-pill cta-pill-secondary">Explore Analytics</span>
+            </div>
         </div>
         """,
         unsafe_allow_html=True
-        )
-        st.markdown("## Platform Modules")
+    )
 
-        col1, col2, col3, col4 = st.columns(4)        
+    st.markdown("""
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="feature-icon">🎯</div>
+            <h4>Accurate Risk Prediction</h4>
+            <p>Identify at-risk students early with a robust dropout model trained on education data.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h4>Interactive Analytics</h4>
+            <p>Visualize attendance, grades, and engagement trends to inform data-driven decisions.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🔍</div>
+            <h4>Explainable AI Insights</h4>
+            <p>Understand why the model predicts student risk with transparent feature explanations.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🌱</div>
+            <h4>Actionable Intervention</h4>
+            <p>Break down risk contributors and focus support where it matters most.</p>
+        </div>
+    </div>
+    """,
+        unsafe_allow_html=True
+    )
 
-        with col1:
-            st.info(
-                """
-                🎯 Prediction        
+    st.markdown("---")
+    st.markdown("## Trusted performance")
 
-                Predict student dropout risk
-                """
-            )        
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Model Accuracy", "91.4%")
+    c2.metric("Total no. of data", "10,000")
+    c3.metric("Key Features Used", "29")
 
-        with col2:
-            st.info(
-                """
-                📊 Analytics        
+    st.markdown("---")
+    st.markdown(
+        """
+        <div class="feature-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h4>Assess risk at scale</h4>
+                <p>Use an intuitive prediction module to score student dropout risk in minutes.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h4>Review explainability</h4>
+                <p>Inspect the most important factors driving each student's risk score.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h4>Enable early action</h4>
+                <p>Translate AI insights into targeted interventions for academic success.</p>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
-                Analyze trends and performance
-                """
-            )        
+    st.markdown("---")
+    st.markdown(
+        """
+        ### 🎯 Mission
 
-        with col3:
-            st.info(
-                """
-                🔍 Explainability        
+        EduShield AI empowers educational institutions to identify at-risk students early and enable
+        timely intervention through machine learning and explainable AI.
+        """
+    )
 
-                Understand AI decisions
-                """
-            )        
-
-        with col4:
-            st.info(
-                """
-                🌳 Risk Decomposition        
-
-                Break down risk contributors
-                """
-            )
-        st.markdown("---")
-
-        st.subheader("Platform Statistics")
-        
-        c1, c2, c3 = st.columns(3)
-        
-        c1.metric("Model Accuracy", "91.4%")
-        c2.metric("Total no. of Data", "10,000")
-        c3.metric("Features", "29")
-        
-        st.markdown("---")
-
-        st.markdown(
-            """
-            ### 🎯 Mission
-        
-            EduShield AI empowers educational institutions
-            to identify at-risk students early and enable
-            timely intervention through Machine Learning
-            and Explainable AI.
-            """
-        )
+if page == "📋 Dashboard":
+    show_dashboard_home()
 
 # OTHER ROUTED PAGES
 elif page == "🎯 Prediction":
