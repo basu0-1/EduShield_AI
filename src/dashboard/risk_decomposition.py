@@ -17,16 +17,19 @@ def show_risk_decomposition():
 
     data = st.session_state["latest_prediction"]
 
+    theme = st.session_state.get("theme", "Light")
+    if theme == "Dark":
+        font_color = "#e6eef8"
+    else:
+        font_color = "#0f172a"
+
     st.subheader(
         f"Current Risk: {data['Risk_Percent']}%"
     )
 
     st.markdown("---")
 
-    # =====================================
     # SAMPLE DECOMPOSITION VALUES
-    # =====================================
-
     decomposition_df = pd.DataFrame({
 
         "Category": [
@@ -81,10 +84,7 @@ def show_risk_decomposition():
         ]
     })
 
-    # =====================================
     # TREEMAP
-    # =====================================
-
     st.subheader("📊 Risk Contribution Treemap")
 
     fig_tree = px.treemap(
@@ -100,6 +100,14 @@ def show_risk_decomposition():
 
         title="Dropout Risk Decomposition"
     )
+    fig_tree.update_layout(
+        margin=dict(l=10, r=10, t=50, b=10),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(color=font_color),
+        title_font=dict(color=font_color),
+    )
+    fig_tree.data[0].textfont = dict(color=font_color)
 
     st.plotly_chart(
         fig_tree,
@@ -108,10 +116,7 @@ def show_risk_decomposition():
 
     st.markdown("---")
 
-    # =====================================
     # EXPANDABLE TREE
-    # =====================================
-
     st.subheader("🌲 Detailed Risk Breakdown")
 
     with st.expander("📚 Academic Factors"):
