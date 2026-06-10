@@ -6,281 +6,230 @@ import plotly.graph_objects as go
 
 def show_analytics():
 
-    st.header("📊 Analytics Dashboard")
-    st.subheader("📈 Current Analytics")
+    st.markdown(
+        """
+        <div class="page-heading">
+            <h1>📊 Analytics Dashboard</h1>
+            <p class="page-subtitle">
+                Review the latest prediction results, compare student risk metrics, and explore historical trends with responsive insights.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    # Check prediction exists
     if "latest_prediction" not in st.session_state:
-
-        st.warning(
-            "Please generate a prediction first."
-        )
-
+        st.warning("Please generate a prediction first.")
         return
-
+    
+    
     data = st.session_state["latest_prediction"]
-    st.markdown("---")
 
-    # =====================================
-    # KPI CARDS
-    # =====================================
-
-    col1, col2, col3 = st.columns(3)
-
-    col1.metric(
-        "Risk %",
-        f"{data['Risk_Percent']}%"
+    st.markdown("<div class='analytics-card'>", unsafe_allow_html=True)
+    st.markdown("<h2>📈 Current Student Snapshot</h2>", unsafe_allow_html=True)
+    st.markdown(
+        f"""
+        <div class='kpi-grid'>
+            <div class='kpi-card'>
+                <h4>Risk %</h4>
+                <strong>{data['Risk_Percent']}%</strong>
+            </div>
+            <div class='kpi-card'>
+                <h4>Attendance %</h4>
+                <strong>{data['Attendance_Rate']}%</strong>
+            </div>
+            <div class='kpi-card'>
+                <h4>GPA</h4>
+                <strong>{data['GPA']:.2f}</strong>
+            </div>
+            <div class='kpi-card'>
+                <h4>Stress Index</h4>
+                <strong>{data['Stress_Index']:.1f}</strong>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
+    st.markdown("</div>", unsafe_allow_html=True)
 
-    col2.metric(
-        "Attendance %",
-        data["Attendance_Rate"]
-    )
-
-    col3.metric(
-        "GPA",
-        data["GPA"]
-    )
-
-    st.markdown("---")
-
-    # =====================================
-    # RISK GAUGE
-    # =====================================
-
-    fig = go.Figure(
+    fig_gauge = go.Figure(
         go.Indicator(
-            mode="gauge+number",
+            mode="gauge+number+delta",
             value=data["Risk_Percent"],
-            title={
-                "text": "Current Student Risk (%)"
-            },
+            delta={"reference": 50, "increasing": {"color": "#ef4444"}},
+            title={"text": "Current Dropout Risk (%)"},
             gauge={
-                "axis": {
-                    "range": [0, 100]
-                },
+                "axis": {"range": [0, 100]},
+                "bar": {"color": "#2563eb"},
                 "steps": [
-                    {
-                        "range": [0, 30],
-                        "color": "lightgreen"
-                    },
-                    {
-                        "range": [30, 70],
-                        "color": "gold"
-                    },
-                    {
-                        "range": [70, 100],
-                        "color": "salmon"
-                    }
-                ]
-            }
+                    {"range": [0, 30], "color": "#22c55e"},
+                    {"range": [30, 70], "color": "#f59e0b"},
+                    {"range": [70, 100], "color": "#ef4444"},
+                ],
+                "threshold": {"line": {"color": "#0f172a", "width": 4}, "thickness": 0.75, "value": data["Risk_Percent"]},
+            },
         )
     )
-
-    st.plotly_chart(
-        fig,
-        use_container_width=True
+    fig_gauge.update_layout(
+        margin=dict(l=10, r=10, t=50, b=10),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="#0f172a"),
     )
 
-    st.markdown("---")
-
-    # =====================================
-    # ATTENDANCE VS GPA
-    # =====================================
-
-    chart_df = pd.DataFrame({
-
-        "Metric": [
-            "Attendance",
-            "GPA x 25"
-        ],
-
-        "Value": [
-            data["Attendance_Rate"],
-            data["GPA"] * 25
-        ]
-    })
-
+    chart_df = pd.DataFrame(
+        {
+            "Metric": ["Attendance", "GPA x 25"],
+            "Value": [data["Attendance_Rate"], data["GPA"] * 25],
+        }
+    )
     fig_bar = px.bar(
-
         chart_df,
-
         x="Metric",
-
         y="Value",
-
-        title="Attendance vs GPA"
+        text_auto=True,
+        title="Attendance vs Equivalent GPA Scale",
+        labels={"Value": "Scaled Value"},
+    )
+    fig_bar.update_traces(marker_color=["#2563eb", "#10b981"], hovertemplate="%{x}: %{y:.1f}<extra></extra>")
+    fig_bar.update_layout(
+        margin=dict(l=10, r=10, t=50, b=10),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="#0f172a"),
     )
 
-    st.plotly_chart(
-        fig_bar,
-        use_container_width=True
+    st.markdown("<div class='analytics-row'>", unsafe_allow_html=True)
+    st.markdown("<div class='chart-card'>", unsafe_allow_html=True)
+    st.plotly_chart(fig_gauge, use_container_width=True, config={"displayModeBar": False})
+    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("<div class='chart-card'>", unsafe_allow_html=True)
+    st.plotly_chart(fig_bar, use_container_width=True, config={"displayModeBar": False})
+    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown("<div class='analytics-card'>", unsafe_allow_html=True)
+    st.markdown("<h2>📋 Student Summary</h2>", unsafe_allow_html=True)
+    summary_df = pd.DataFrame(
+        {
+            "Attribute": [
+                "Age",
+                "Department",
+                "Attendance",
+                "Stress Index",
+                "Risk Level",
+                "Risk %",
+            ],
+            "Value": [
+                data["Age"],
+                data["Department"],
+                f"{data['Attendance_Rate']}%",
+                f"{data['Stress_Index']:.1f}",
+                data["Risk_Level"],
+                f"{data['Risk_Percent']}%",
+            ],
+        }
     )
-
-    st.markdown("---")
-
-    # =====================================
-    # STUDENT SUMMARY
-    # =====================================
-
-    st.subheader(
-        "📋 Student Summary"
-    )
-
-    summary_df = pd.DataFrame({
-
-        "Attribute": [
-
-            "Age",
-            "Department",
-            "Attendance",
-            "Stress Index",
-            "Risk Level",
-            "Risk %"
-        ],
-
-        "Value": [
-
-            data["Age"],
-            data["Department"],
-            data["Attendance_Rate"],
-            data["Stress_Index"],
-            data["Risk_Level"],
-            data["Risk_Percent"]
-        ]
-    })
-
     st.table(summary_df)
-    
+    st.markdown("</div>", unsafe_allow_html=True)
+
     st.markdown("---")
+    st.markdown(
+        """
+        <div class='page-heading'>
+            <h2>📈 Historical Analytics</h2>
+            <p class='page-subtitle'>Track risk trends, department averages, and prediction history for better intervention planning.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    st.subheader("📈 Historical Analytics")
-    
     history_file = r"C:\Projects\EduShield_AI\data\predictions\predictions_history.csv"
-    
     try:
-    
         df = pd.read_csv(history_file)
-        st.write("Columns in CSV:")
-        st.write(df.columns.tolist())
-        # =====================================
-        # KPI CARDS
-        # =====================================
-    
+        df["Timestamp"] = pd.to_datetime(df["Timestamp"])
+
+        risk_counts = df["Risk_level"].str.title().value_counts()
+        dept_risk = df.groupby("Department")["Risk_percent"].mean().reset_index()
+        trend_df = df.sort_values("Timestamp")
+
         total_predictions = len(df)
+        high_risk = len(df[df["Risk_level"].str.lower() == "high"])
+        medium_risk = len(df[df["Risk_level"].str.lower() == "medium"])
+        low_risk = len(df[df["Risk_level"].str.lower() == "low"])
 
-        high_risk = len(
-            df[df["Risk_level"].str.lower() == "high"]
-        )
-    
-        medium_risk = len(
-            df[df["Risk_level"].str.lower() == "medium"]
-        )
-    
-        low_risk = len(
-            df[df["Risk_level"].str.lower() == "low"]
-        )
-    
-        col1, col2, col3, col4 = st.columns(4)
-    
-        col1.metric(
-        "Total Predictions",
-        total_predictions
-        )
-    
-        col2.metric(
-            "High Risk",
-            high_risk
-        )
-    
-        col3.metric(
-            "Medium Risk",
-            medium_risk
-        )
-    
-        col4.metric(
-            "Low Risk",
-            low_risk
-        )
-    
-        st.markdown("---")
+        st.markdown("<div class='analytics-row'>", unsafe_allow_html=True)
+        st.markdown("<div class='analytics-card'>", unsafe_allow_html=True)
+        st.markdown("<h2>Prediction KPIs</h2>", unsafe_allow_html=True)
+        k1, k2, k3, k4 = st.columns(4)
+        k1.metric("Total Predictions", total_predictions)
+        k2.metric("High Risk", high_risk)
+        k3.metric("Medium Risk", medium_risk)
+        k4.metric("Low Risk", low_risk)
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    # =====================================
-    # RISK DISTRIBUTION PIE CHART
-    # =====================================
-
-        risk_counts = df["Risk_level"].value_counts()
-    
+        st.markdown("<div class='chart-card'>", unsafe_allow_html=True)
         fig_pie = px.pie(
             values=risk_counts.values,
             names=risk_counts.index,
-            title="Risk Distribution"
+            title="Risk Distribution",
+            hole=0.45,
         )
-    
-        st.plotly_chart(
-            fig_pie,
-            use_container_width=True
+        fig_pie.update_traces(textposition="inside", textinfo="percent+label")
+        fig_pie.update_layout(
+            margin=dict(l=10, r=10, t=50, b=10),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="#0f172a"),
         )
-    
-        st.markdown("---")
-    
-        # =====================================
-        # DEPARTMENT WISE RISK
-        # =====================================
-    
-        dept_risk = df.groupby(
-            "Department"
-        )["Risk_percent"].mean().reset_index()
-    
+        st.plotly_chart(fig_pie, use_container_width=True, config={"displayModeBar": False})
+        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+
         fig_dept = px.bar(
             dept_risk,
             x="Department",
             y="Risk_percent",
-            title="Average Risk by Department"
+            title="Average Risk by Department",
+            text_auto=True,
+            labels={"Risk_percent": "Risk (%)"},
         )
-    
-        st.plotly_chart(
-            fig_dept,
-            use_container_width=True
+        fig_dept.update_traces(marker_color="#2563eb")
+        fig_dept.update_layout(
+            margin=dict(l=10, r=10, t=50, b=10),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="#0f172a"),
         )
-    
-        st.markdown("---")
-    
-        # =====================================
-        # HISTORY TABLE
-        # =====================================
-    
-        st.subheader("📋 Prediction History")
-    
-        st.dataframe(
-        df.tail(20),
-        use_container_width=True
-        )
-        
-        st.markdown("---")
 
-        st.subheader("📈 Risk Trend Over Time")
-        
-        trend_df = df.copy()
-        
-        trend_df["Timestamp"] = pd.to_datetime(
-            trend_df["Timestamp"]
-        )
-        
         fig_trend = px.line(
             trend_df,
             x="Timestamp",
             y="Risk_percent",
             markers=True,
-            title="Student Risk Trend"
+            title="Risk Trend Over Time",
         )
-        
-        st.plotly_chart(
-            fig_trend,
-            use_container_width=True
+        fig_trend.update_traces(line_color="#10b981", marker_color="#2563eb")
+        fig_trend.update_layout(
+            margin=dict(l=10, r=10, t=50, b=10),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="#0f172a"),
         )
+
+        st.markdown("<div class='analytics-row'>", unsafe_allow_html=True)
+        st.markdown("<div class='chart-card'>", unsafe_allow_html=True)
+        st.plotly_chart(fig_dept, use_container_width=True, config={"displayModeBar": False})
+        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("<div class='chart-card'>", unsafe_allow_html=True)
+        st.plotly_chart(fig_trend, use_container_width=True, config={"displayModeBar": False})
+        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        st.markdown("<div class='table-card'>", unsafe_allow_html=True)
+        st.markdown("<h2>Recent Prediction History</h2>", unsafe_allow_html=True)
+        st.dataframe(df.tail(20).reset_index(drop=True), use_container_width=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+
     except Exception as e:
-    
-        st.error(
-            f"Unable to load history: {e}"
-        )
+        st.error(f"Unable to load history: {e}")
