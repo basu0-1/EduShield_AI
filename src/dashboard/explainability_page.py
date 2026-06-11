@@ -112,11 +112,10 @@ def show_explainability():
         st.markdown("<div class='explain-image-card'>", unsafe_allow_html=True)
         st.markdown(f"<h3>{item['title']}</h3>", unsafe_allow_html=True)
         try:
-            image = Image.open(item["path"])
-            st.image(image, use_column_width=True)
-            file_url = item["path"].absolute().as_uri()
+            image = Image.open(item["path"]) 
+            # use explicit pixel width instead of deprecated use_column_width
+            st.image(image, width=1000)
             st.markdown(
-                
                 f"<div class='image-detail-box'>{item['description']}</div>",
                 unsafe_allow_html=True,
             )
