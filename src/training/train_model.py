@@ -33,7 +33,19 @@ from model_config import (
     TEST_SIZE
 )
 from xgboost import XGBClassifier
+from sklearn.tree import DecisionTreeClassifier
 
+from sklearn.neighbors import KNeighborsClassifier
+
+from sklearn.svm import SVC
+
+from sklearn.naive_bayes import GaussianNB
+
+from sklearn.ensemble import (
+    AdaBoostClassifier,
+    GradientBoostingClassifier,
+    ExtraTreesClassifier
+)
 # LOAD DATA
 df = pd.read_csv(DATA_PATH)
 
@@ -186,11 +198,46 @@ models = {
             random_state=RANDOM_STATE
         ),
 
+    "Decision Tree":
+        DecisionTreeClassifier(
+            random_state=RANDOM_STATE
+        ),
+
     "Random Forest":
         RandomForestClassifier(
             n_estimators=200,
             random_state=RANDOM_STATE
         ),
+
+    "Extra Trees":
+        ExtraTreesClassifier(
+            n_estimators=200,
+            random_state=RANDOM_STATE
+        ),
+
+    "AdaBoost":
+        AdaBoostClassifier(
+            random_state=RANDOM_STATE
+        ),
+
+    "Gradient Boosting":
+        GradientBoostingClassifier(
+            random_state=RANDOM_STATE
+        ),
+
+    "KNN":
+        KNeighborsClassifier(
+            n_neighbors=5
+        ),
+
+    "SVM":
+        SVC(
+            probability=True,
+            random_state=RANDOM_STATE
+        ),
+
+    "Naive Bayes":
+        GaussianNB(),
 
     "XGBoost":
         XGBClassifier(
@@ -305,3 +352,8 @@ print(best_model_name)
 print(f"ROC AUC: {best_score:.4f}")
 
 print("\nModel Saved Successfully")
+
+results_df = pd.DataFrame(results).T
+
+print("\nMODEL COMPARISON")
+print(results_df)
