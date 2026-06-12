@@ -13,37 +13,25 @@ from sklearn.preprocessing import (
     StandardScaler
 )
 
-# --------------------------------------------------
 # CREATE OUTPUT DIRECTORY
-# --------------------------------------------------
-
 os.makedirs(
     "reports/figures",
     exist_ok=True
 )
 
-# --------------------------------------------------
 # LOAD DATA
-# --------------------------------------------------
-
 DATA_PATH = r"C:\Projects\EduShield_AI\data\processed\student_dropout_featured.csv"
 
 df = pd.read_csv(DATA_PATH)
 
 print("\nDataset Loaded Successfully")
 
-# --------------------------------------------------
 # FEATURES AND TARGET
-# --------------------------------------------------
-
 X = df.drop(columns=["Dropout"])
 
 y = df["Dropout"]
 
-# --------------------------------------------------
 # FEATURE LISTS
-# --------------------------------------------------
-
 numerical_features = [
 
     "Age",
@@ -82,10 +70,7 @@ categorical_features = [
 
 ]
 
-# --------------------------------------------------
 # PREPROCESSING
-# --------------------------------------------------
-
 numeric_transformer = Pipeline(
     steps=[
         ("imputer", SimpleImputer(strategy="median")),
@@ -115,10 +100,7 @@ preprocessor = ColumnTransformer(
     ]
 )
 
-# --------------------------------------------------
 # SPLIT
-# --------------------------------------------------
-
 X_train, X_test, y_train, y_test = train_test_split(
     X,
     y,
@@ -132,20 +114,14 @@ X_test_processed = preprocessor.transform(X_test)
 
 print("\nPreprocessing Completed")
 
-# --------------------------------------------------
 # LOAD MODEL
-# --------------------------------------------------
-
 model = joblib.load(
     "models/best_model.pkl"
 )
 
 print("\nBest Model Loaded Successfully")
 
-# --------------------------------------------------
 # FEATURE NAMES
-# --------------------------------------------------
-
 encoded_features = preprocessor.named_transformers_[
     "cat"
 ].named_steps[
@@ -159,10 +135,7 @@ feature_names = (
     + list(encoded_features)
 )
 
-# --------------------------------------------------
 # SHAP EXPLAINER
-# --------------------------------------------------
-
 explainer = shap.Explainer(
     model,
     X_train_processed
@@ -170,20 +143,14 @@ explainer = shap.Explainer(
 
 print("\nSHAP Explainer Created")
 
-# --------------------------------------------------
 # SHAP VALUES
-# --------------------------------------------------
-
 sample_data = X_test_processed[:500]
 
 shap_values = explainer(sample_data)
 
 print("\nSHAP Values Generated")
 
-# --------------------------------------------------
 # SHAP SUMMARY PLOT
-# --------------------------------------------------
-
 plt.figure()
 
 shap.summary_plot(
@@ -200,10 +167,7 @@ plt.savefig(
 
 plt.close()
 
-# --------------------------------------------------
 # SHAP BAR PLOT
-# --------------------------------------------------
-
 plt.figure()
 
 shap.plots.bar(
@@ -218,14 +182,11 @@ plt.savefig(
 
 plt.close()
 
-# --------------------------------------------------
 # SHAP WATERFALL PLOT
-# --------------------------------------------------
-
 plt.figure(figsize=(10, 6))
 
 shap.plots.waterfall(
-    shap_values[0],
+    shap_name,
     show=False
 )
 
