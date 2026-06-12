@@ -96,16 +96,7 @@ def show_explainability():
                 "Higher bars mean stronger influence on the student’s dropout risk, regardless of direction. "
                 "Use this plot to understand which metrics are most critical for intervention planning."
             ),
-        },
-        {
-            "title": "🌊 SHAP Waterfall Plot",
-            "path": Path("reports/figures/shap_waterfall.png"),
-            "description": (
-                "The SHAP waterfall plot breaks the final risk score into the base value plus individual feature contributions. "
-                "It makes the prediction transparent by showing exactly how each factor nudges the risk up or down. "
-                "This is useful for tracing the model’s reasoning and spotting the key levers for reducing dropout probability."
-            ),
-        },
+        }
     ]
 
     for item in image_items:
