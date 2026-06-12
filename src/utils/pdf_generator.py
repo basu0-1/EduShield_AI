@@ -34,7 +34,7 @@ def generate_professional_pdf(data, output_path):
     content.append(Spacer(1, 20))
     content.append(
         Paragraph(
-            "Generated On: {datetime.now().strftime('%d-%m-%Y %H:%M')}",
+            f"Generated On: {datetime.now().strftime('%d-%m-%Y %H:%M')}",
             styles["BodyText"]
         )
     )
@@ -55,35 +55,35 @@ def generate_professional_pdf(data, output_path):
     
     content.append(
         Paragraph(
-            "Student Name: {data['Student_Name']}",
+            f"Student Name: {data.get('Student_Name', '')}",
             styles["BodyText"]
         )
     )
     
     content.append(
         Paragraph(
-            f"Age: {data['Age']}",
+            f"Age: {data.get('Age','')}",
             styles["BodyText"]
         )
     )
 
     content.append(
         Paragraph(
-            f"Department: {data['Department']}",
+            f"Department: {data.get('Department','')}",
             styles["BodyText"]
         )
     )
 
     content.append(
         Paragraph(
-            f"GPA: {data['GPA']}",
+            f"GPA: {data.get('GPA','')}",
             styles["BodyText"]
         )
     )
 
     content.append(
         Paragraph(
-            f"Attendance Rate: {data['Attendance_Rate']}%",
+            f"Attendance Rate: {data.get('Attendance_Rate','')}%",
             styles["BodyText"]
         )
     )
@@ -103,14 +103,14 @@ def generate_professional_pdf(data, output_path):
 
     content.append(
         Paragraph(
-            f"Risk Percentage: {data['Risk_Percent']}%",
+            f"Risk Percentage: {data.get('Risk_Percent','')}%",
             styles["BodyText"]
         )
     )
 
     content.append(
         Paragraph(
-            f"Risk Level: {data['Risk_Level']}",
+            f"Risk Level: {data.get('Risk_Level','')}",
             styles["BodyText"]
         )
     )
