@@ -12,8 +12,6 @@ preprocessor = joblib.load("models/preprocessor.pkl")
 
 
 def show_prediction():
-    from src.utils.pdf_generator import (generate_professional_pdf)
-    import os
 
     st.markdown(
         """
@@ -332,58 +330,6 @@ def show_prediction():
 
             st.session_state["report_data"]["SHAP Waterfall"] = \
                 "reports/figures/shap_waterfall.png"
-            # ====================================
-            # PDF REPORT SECTION
-            # ====================================
-            
-            if st.session_state.get("prediction_done", True):
-            
-                st.markdown("---")
-                st.subheader("📄 PDF Report Generator")
-            
-                if st.button("📄 Generate Report"):
-                    st.success("Generating PDF report...")
-
-                    report_data = st.session_state.get("report_data", {})
-
-                    PDF_FOLDER = "reports/pdf_reports"
-                    os.makedirs(PDF_FOLDER, exist_ok=True)
-
-                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-
-                    professional_pdf_path = os.path.join(
-                        PDF_FOLDER,
-                        f"professional_report_{timestamp}.pdf"
-                    )
-
-                    try:
-                        # normalize keys expected by pdf generator
-                        pdf_data = {
-                            "Student_Name": report_data.get("Student_Name", student_name),
-                            "Age": report_data.get("Age", age),
-                            "Department": report_data.get("Department", department),
-                            "GPA": report_data.get("GPA", gpa),
-                            # support both 'Attendance Rate' and 'Attendance_Rate'
-                            "Attendance_Rate": report_data.get("Attendance_Rate", report_data.get("Attendance Rate", attendance_rate)),
-                            "Risk_Percent": report_data.get("Risk_Percent", report_data.get("Risk Percent", risk_percent)),
-                            "Risk_Level": report_data.get("Risk_Level", report_data.get("Risk Level", risk_level)),
-                        }
-
-                        # call generator with data and output path
-                        generate_professional_pdf(pdf_data, professional_pdf_path)
-
-                        st.success("PDF generated successfully")
-
-                        with open(professional_pdf_path, "rb") as pdf:
-                            st.download_button(
-                                label="⬇ Download Student Report",
-                                data=pdf,
-                                file_name=os.path.basename(professional_pdf_path),
-                                mime="application/pdf",
-                            )
-
-                    except Exception as e:
-                        st.error(f"PDF Generation Error: {e}")
         except Exception as e:
 
             st.error(f"Prediction Error: {e}")
